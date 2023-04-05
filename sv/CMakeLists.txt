@@ -12,5 +12,5 @@ add_subdirectory(util)
 add_subdirectory(dsol)
 
 if(BUILD_ROS)
-  add_subdirectory(ros1)
+  add_subdirectory(ros2)
 endif()

@@ -212,7 +212,7 @@ if(BUILD_ROS)
   cc_library(
     NAME dsol_node_util
     SRCS "node_util.cpp"
-    DEPS sv_ros1_msg_conv sv_dsol_direct sv_dsol_odom)
+    DEPS sv_ros2_msg_conv sv_dsol_direct sv_dsol_odom)
 
   cc_binary(
     NAME dsol_node_data
@@ -223,4 +223,8 @@ if(BUILD_ROS)
     NAME dsol_node_odom
     SRCS "node_odom.cpp"
     DEPS sv_dsol_extra sv_util_dataset sv_dsol_node_util)
+
+  install(TARGETS
+          sv_dsol_node_util sv_dsol_node_data sv_dsol_node_odom
+          DESTINATION lib/${PROJECT_NAME})
 endif()

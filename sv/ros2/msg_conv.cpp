@@ -1,4 +1,4 @@
-#include "sv/ros1/msg_conv.h"
+#include "msg_conv.h"
 
 #include <fmt/ranges.h>
 
@@ -9,8 +9,8 @@ namespace sv {
 using SO3d = Sophus::SO3d;
 using SE3d = Sophus::SE3d;
 
-namespace gm = geometry_msgs;
-using sensor_msgs::PointField;
+namespace gm = geometry_msgs::msg;
+using sensor_msgs::msg::PointField;
 
 void Eigen2Ros(const Eigen::Vector3d& e, gm::Point& r) {
   r.x = e.x();

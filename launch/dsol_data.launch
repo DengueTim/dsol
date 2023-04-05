@@ -1,6 +1,6 @@
 <launch>
     <arg name="debug" default="false"/>
-    <env if="$(arg debug)" name="ROSCONSOLE_CONFIG_FILE" value="$(find dsol)/launch/debug.conf"/>
+    <set_env if="$(var debug)" name="ROSCONSOLE_CONFIG_FILE" value="$(find-pkg-share dsol)/launch/debug.conf"/>
 
     <arg name="start" default="0"/>
     <arg name="end" default="0"/>
@@ -8,37 +8,39 @@
 
     <arg name="tbb" default="1"/>
     <arg name="log" default="5"/>
-    <arg name="vis" default="true"/>
-    <arg name="freq" default="10"/>
+    <arg name="vis" default="1"/>
+    <arg name="freq" default="10.0"/>
     <arg name="save" default=""/>
     <arg name="wait_ms" default="10"/>
 
     <arg name="data" default="vk2"/>
-    <arg name="data_dir" default="/home/chao/Workspace/dataset/vkitti/Scene01/clone"/>
+    <arg name="data_dir" default="/home/tp/datasets/vkitti/Scene20/clone"/>
     <!-- <arg name="data_dir" default="/home/chao/Workspace/dataset/kitti/dataset/sequences/00"/> -->
     <!-- <arg name="data_dir" default="/home/chao/Workspace/dataset/tartan_air/gascola/Easy/P003"/> -->
     <arg name="data_max_depth" default="100.0"/>
     <arg name="cloud_max_depth" default="50.0"/>
     <arg name="motion_alpha" default="0.5"/>
 
-    <node pkg="dsol" type="sv_dsol_node_data" name="dsol_data" output="screen">
-        <rosparam command="load" file="$(find dsol)/config/dsol.yaml"/>
-        <rosparam command="load" file="$(find dsol)/config/dsol_$(arg data).yaml"/>
+    <node pkg="dsol" exec="sv_dsol_node_data" name="dsol_data" output="screen" namespace= "dsol_data">
+        <param from="$(find-pkg-share dsol)/config/dsol.yaml"/>
+        <param from="$(find-pkg-share dsol)/config/dsol_$(var data).yaml"/>
 
-        <param name="tbb" type="int" value="$(arg tbb)"/>
-        <param name="log" type="int" value="$(arg log)"/>
-        <param name="vis" type="bool" value="$(arg vis)"/>
-        <param name="freq" type="double" value="$(arg freq)"/>
-        <param name="save" type="string" value="$(arg save)"/>
-        <param name="wait_ms" type="int" value="$(arg wait_ms)"/>
+        <param name="tbb" value="$(var tbb)"/>
+        <param name="log" value="$(var log)"/>
+        <param name="vis" value="$(var vis)"/>
+        <param name="freq" value="$(var freq)"/>
+        <param name="save" value="$(var save)"/>
+        <param name="wait_ms" value="$(var wait_ms)"/>
 
-        <param name="data_dir" type="str" value="$(arg data_dir)"/>
-        <param name="data_max_depth" type="double" value="$(arg data_max_depth)"/>
-        <param name="cloud_max_depth" type="double" value="$(arg cloud_max_depth)"/>
-        <param name="motion_alpha" type="double" value="$(arg motion_alpha)"/>
+        <param name="data_dir" value="$(var data_dir)"/>
+        <param name="data_max_depth" value="$(var data_max_depth)"/>
+        <param name="cloud_max_depth" value="$(var cloud_max_depth)"/>
+        <param name="motion_alpha" value="$(var motion_alpha)"/>
 
-        <param name="start" type="int" value="$(arg start)"/>
-        <param name="end" type="int" value="$(arg end)"/>
-        <param name="reverse" type="bool" value="$(arg reverse)"/>
+        <param name="start" value="$(var start)"/>
+        <param name="end" value="$(var end)"/>
+        <param name="reverse" value="$(var reverse)"/>
+
+        <param name="max_grad" value="123"/>
     </node>
 </launch>

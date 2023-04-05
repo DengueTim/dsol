@@ -1,5 +1,5 @@
 Panels:
-  - Class: rviz/Displays
+  - Class: rviz_common/Displays
     Help Height: 78
     Name: Displays
     Property Tree Widget:
@@ -10,21 +10,21 @@ Panels:
         - /Large1
       Splitter Ratio: 0.5
     Tree Height: 813
-  - Class: rviz/Selection
+  - Class: rviz_common/Selection
     Name: Selection
-  - Class: rviz/Tool Properties
+  - Class: rviz_common/Tool Properties
     Expanded:
       - /2D Pose Estimate1
       - /2D Nav Goal1
       - /Publish Point1
     Name: Tool Properties
     Splitter Ratio: 0.5886790156364441
-  - Class: rviz/Views
+  - Class: rviz_common/Views
     Expanded:
       - /Current View1
     Name: Views
     Splitter Ratio: 0.5
-  - Class: rviz/Time
+  - Class: rviz_common/Time
     Experimental: false
     Name: Time
     SyncMode: 0
@@ -38,7 +38,7 @@ Visualization Manager:
   Displays:
     - Alpha: 0.5
       Cell Size: 10
-      Class: rviz/Grid
+      Class: rviz_default_plugins/Grid
       Color: 160; 160; 164
       Enabled: false
       Line Style:
@@ -55,14 +55,14 @@ Visualization Manager:
       Reference Frame: <Fixed Frame>
       Value: false
     - Alpha: 1
-      Class: rviz/Axes
+      Class: rviz_default_plugins/Axes
       Enabled: false
       Length: 10
       Name: Axes
       Radius: 1
       Reference Frame: <Fixed Frame>
       Value: false
-    - Class: rviz/TF
+    - Class: rviz_default_plugins/TF
       Enabled: false
       Frame Timeout: 15
       Frames:
@@ -77,7 +77,7 @@ Visualization Manager:
         {}
       Update Interval: 0
       Value: false
-    - Class: rviz/Group
+    - Class: rviz_common/Group
       Displays:
         - Alpha: 1
           Autocompute Intensity Bounds: true
@@ -87,7 +87,7 @@ Visualization Manager:
             Value: true
           Axis: Z
           Channel Name: intensity
-          Class: rviz/PointCloud2
+          Class: rviz_default_plugins/PointCloud2
           Color: 255; 255; 255
           Color Transformer: RGB8
           Decay Time: 5
@@ -110,7 +110,7 @@ Visualization Manager:
         - Alpha: 1
           Axes Length: 1
           Axes Radius: 0.10000000149011612
-          Class: rviz/Pose
+          Class: rviz_default_plugins/Pose
           Color: 255; 25; 0
           Enabled: true
           Head Length: 0.30000001192092896
@@ -133,7 +133,7 @@ Visualization Manager:
         Value: true
       Axis: Z
       Channel Name: intensity
-      Class: rviz/PointCloud2
+      Class: rviz_default_plugins/PointCloud2
       Color: 255; 255; 255
       Color Transformer: Intensity
       Decay Time: 10000
@@ -155,11 +155,11 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: false
       Value: true
-    - Class: rviz/Group
+    - Class: rviz_common/Group
       Displays:
         - Alpha: 1
           Buffer Length: 1
-          Class: rviz/Path
+          Class: rviz_default_plugins/Path
           Color: 255; 0; 0
           Enabled: true
           Head Diameter: 0.30000001192092896
@@ -185,7 +185,7 @@ Visualization Manager:
           Arrow Length: 0.30000001192092896
           Axes Length: 1
           Axes Radius: 0.10000000149011612
-          Class: rviz/PoseArray
+          Class: rviz_default_plugins/PoseArray
           Color: 255; 25; 0
           Enabled: false
           Head Length: 0.07000000029802322
@@ -200,7 +200,7 @@ Visualization Manager:
           Value: false
         - Alpha: 1
           Buffer Length: 1
-          Class: rviz/Path
+          Class: rviz_default_plugins/Path
           Color: 85; 255; 0
           Enabled: true
           Head Diameter: 0.30000001192092896
@@ -225,7 +225,7 @@ Visualization Manager:
         - Alpha: 1
           Axes Length: 1
           Axes Radius: 0.10000000149011612
-          Class: rviz/Pose
+          Class: rviz_default_plugins/Pose
           Color: 255; 25; 0
           Enabled: true
           Head Length: 5
@@ -240,11 +240,11 @@ Visualization Manager:
           Value: true
       Enabled: false
       Name: Small
-    - Class: rviz/Group
+    - Class: rviz_common/Group
       Displays:
         - Alpha: 1
           Buffer Length: 1
-          Class: rviz/Path
+          Class: rviz_default_plugins/Path
           Color: 255; 0; 0
           Enabled: true
           Head Diameter: 0.30000001192092896
@@ -268,7 +268,7 @@ Visualization Manager:
           Value: true
         - Alpha: 1
           Buffer Length: 1
-          Class: rviz/Path
+          Class: rviz_default_plugins/Path
           Color: 0; 255; 0
           Enabled: true
           Head Diameter: 0.30000001192092896
@@ -294,7 +294,7 @@ Visualization Manager:
           Arrow Length: 0.30000001192092896
           Axes Length: 10
           Axes Radius: 1
-          Class: rviz/PoseArray
+          Class: rviz_default_plugins/PoseArray
           Color: 255; 25; 0
           Enabled: false
           Head Length: 0.07000000029802322
@@ -310,7 +310,7 @@ Visualization Manager:
         - Alpha: 1
           Axes Length: 20
           Axes Radius: 2
-          Class: rviz/Pose
+          Class: rviz_default_plugins/Pose
           Color: 255; 25; 0
           Enabled: true
           Head Length: 0.30000001192092896
@@ -333,26 +333,26 @@ Visualization Manager:
     Frame Rate: 30
   Name: root
   Tools:
-    - Class: rviz/Interact
+    - Class: rviz_default_plugins/Interact
       Hide Inactive Objects: true
-    - Class: rviz/MoveCamera
-    - Class: rviz/Select
-    - Class: rviz/FocusCamera
-    - Class: rviz/Measure
-    - Class: rviz/SetInitialPose
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+    - Class: rviz_default_plugins/SetInitialPose
       Theta std deviation: 0.2617993950843811
       Topic: /initialpose
       X std deviation: 0.5
       Y std deviation: 0.5
-    - Class: rviz/SetGoal
+    - Class: rviz_default_plugins/SetGoal
       Topic: /move_base_simple/goal
-    - Class: rviz/PublishPoint
+    - Class: rviz_default_plugins/PublishPoint
       Single click: true
       Topic: /clicked_point
   Value: true
   Views:
     Current:
-      Class: rviz/Orbit
+      Class: rviz_default_plugins/Orbit
       Distance: 240.36685180664062
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
