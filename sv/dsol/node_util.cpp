@@ -156,7 +156,7 @@ Camera MakeCamera(const sensor_msgs::msg::CameraInfo& cinfo_msg) {
   // 8, 9, 10, 11
   Eigen::Array4d fc;
   fc << P[0], P[5], P[2], P[6];
-  return {size, fc, -P[3] / P[0]};
+  return {size, fc, -P[3] / (P[0] * 1000)};
 }
 
 void Keyframe2Cloud(const Keyframe& keyframe,

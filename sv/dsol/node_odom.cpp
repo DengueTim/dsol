@@ -44,6 +44,8 @@ class NodeOdom : public rclcpp::Node {
 
   void PublishOdom(const std_msgs::msg::Header& header, const Sophus::SE3d& tf);
   void PublishCloud(const std_msgs::msg::Header& header);
+  void SendTransform(const gm::PoseStamped& pose_msg,
+                     const std::string& child_frame);
 
   using SyncStereo = mf::TimeSynchronizer<sm::Image, sm::Image>;
   using SyncStereoDepth = mf::TimeSynchronizer<sm::Image, sm::Image, sm::Image>;
@@ -64,10 +66,13 @@ class NodeOdom : public rclcpp::Node {
   rclcpp::Publisher<gm::PoseArray>::SharedPtr pub_parray_;
   PosePathPublisher pub_odom_;
 
+  rclcpp::Time prev_stamp = rclcpp::Time(0);
+
   MotionModel motion_;
   DirectOdometry odom_;
 
   std::string frame_{"fixed"};
+  std::shared_ptr<tf2_ros::TransformBroadcaster> tfbr_;
   sm::PointCloud2 cloud_;
 };
 
@@ -132,15 +137,19 @@ void NodeOdom::InitRosIO() {
   pub_odom_ = PosePathPublisher(*this, "odom", frame_);
   pub_points_ = create_publisher<sm::PointCloud2>("points", 1);
   pub_parray_ = create_publisher<gm::PoseArray>("parray", 1);
+
+  tfbr_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 }
 
 void NodeOdom::Cinfo1Cb(const sensor_msgs::msg::CameraInfo& cinfo1_msg) {
   odom_.camera = MakeCamera(cinfo1_msg);
   RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), odom_.camera.Repr());
-  //sub_cinfo1_->shutdown();
+  //sub_cinfo1_.reset(); // Does this unsubscribe?
 }
 
-void NodeOdom::AccCb(const sensor_msgs::msg::Imu& acc_msg) {}
+void NodeOdom::AccCb(const sensor_msgs::msg::Imu& acc_msg) {
+  (void)acc_msg;
+}
 
 void NodeOdom::GyrCb(const sensor_msgs::msg::Imu& gyr_msg) {
   // Normally there is a transform from imu to camera, but in realsense, imu and
@@ -158,9 +167,15 @@ void NodeOdom::StereoCb(const sensor_msgs::msg::Image::ConstSharedPtr& image0_pt
 void NodeOdom::StereoDepthCb(const sensor_msgs::msg::Image::ConstSharedPtr& image0_ptr,
                              const sensor_msgs::msg::Image::ConstSharedPtr& image1_ptr,
                              const sensor_msgs::msg::Image::ConstSharedPtr& depth0_ptr) {
+  if (!odom_.camera.is_stereo()) {
+    return; // Haven't got camera info yet.
+  }
+
   const auto curr_header = image0_ptr->header;
   const auto image0 = cb::toCvShare(image0_ptr)->image;
   const auto image1 = cb::toCvShare(image1_ptr)->image;
+
+  rclcpp::Time curr_stamp(curr_header.stamp);
 
   // depth
   cv::Mat depth0;
@@ -170,11 +185,10 @@ void NodeOdom::StereoDepthCb(const sensor_msgs::msg::Image::ConstSharedPtr& imag
   }
 
   // Get delta time
-  static rclcpp::Time prev_stamp(0);
   const rclcpp::Duration delta_duration =
-      prev_stamp == rclcpp::Time(0) ? rclcpp::Duration(0, 0) : rclcpp::Time(curr_header.stamp) - prev_stamp;
+      prev_stamp.seconds() == 0 ? rclcpp::Duration(0, 0) : curr_stamp - prev_stamp;
   const auto dt = delta_duration.seconds();
-  RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "dt: " << dt * 1000);
+  RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "dt: " << dt);
 
   // Motion model
   Sophus::SE3d dtf_pred;
@@ -192,18 +206,19 @@ void NodeOdom::StereoDepthCb(const sensor_msgs::msg::Image::ConstSharedPtr& imag
                     gyrs_.back().header.stamp.sec));
     Sophus::SO3d dR{};
     int n_imus = 0;
+    rclcpp::Time prev_imu_stamp = prev_stamp;
     for (size_t i = 0; i < gyrs_.size(); ++i) {
       const auto& imu = gyrs_[i];
+      rclcpp::Time imu_stamp(imu.header.stamp);
       // Skip imu msg that is earlier than the previous odom
-      if (rclcpp::Time(imu.header.stamp) <= prev_stamp) continue;
-      if (rclcpp::Time(imu.header.stamp) > curr_header.stamp) continue;
+      if (imu_stamp <= prev_stamp || imu_stamp > curr_stamp) continue;
 
-      const auto prev_imu_stamp =
-          i == 0 ? prev_stamp : rclcpp::Time(gyrs_.at(i - 1).header.stamp);
-      const double dt_imu = (rclcpp::Time(imu.header.stamp) - prev_imu_stamp).seconds();
+      const double dt_imu = (imu_stamp - prev_imu_stamp).seconds();
       CHECK_GT(dt_imu, 0);
-      Eigen::Map<const Eigen::Vector3d> w(&imu.angular_velocity.x);
+      const Eigen::Vector3d w(imu.angular_velocity.x, imu.angular_velocity.y, imu.angular_velocity.z);
+      //Eigen::Map<const Eigen::Vector3d> w(&imu.angular_velocity);
       dR *= Sophus::SO3d::exp(w * dt_imu);
+      prev_imu_stamp = imu_stamp;
       ++n_imus;
     }
     RCLCPP_INFO_STREAM(rclcpp::get_logger("rclcpp"), "n_imus: " << n_imus);
@@ -224,20 +239,21 @@ void NodeOdom::StereoDepthCb(const sensor_msgs::msg::Image::ConstSharedPtr& imag
   // publish stuff
   std_msgs::msg::Header header;
   header.frame_id = "fixed";
-  header.stamp = curr_header.stamp;
+  header.stamp = curr_stamp;
 
   PublishOdom(header, status.Twc());
   if (status.map.remove_kf) {
     PublishCloud(header);
   }
 
-  prev_stamp = curr_header.stamp;
+  prev_stamp = curr_stamp;
 }
 
 void NodeOdom::PublishOdom(const std_msgs::msg::Header& header,
                            const Sophus::SE3d& tf) {
   // Publish odom poses
   const auto pose_msg = pub_odom_.Publish(header.stamp, tf);
+  SendTransform(pose_msg, "camera");
 
   // Publish keyframe poses
   const auto poses = odom_.window.GetAllPoses();
@@ -260,6 +276,15 @@ void NodeOdom::PublishCloud(const std_msgs::msg::Header& header) {
   RCLCPP_DEBUG_STREAM(rclcpp::get_logger("rclcpp"), odom_.window.MargKf().status().Repr());
   Keyframe2Cloud(odom_.window.MargKf(), cloud_, 50.0);
   pub_points_->publish(cloud_);
+}
+
+void NodeOdom::SendTransform(const geometry_msgs::msg::PoseStamped& pose_msg,
+                             const std::string& child_frame) {
+  gm::TransformStamped tf_msg;
+  tf_msg.header = pose_msg.header;
+  tf_msg.child_frame_id = child_frame;
+  Ros2Ros(pose_msg.pose, tf_msg.transform);
+  tfbr_->sendTransform(tf_msg);
 }
 
 // void NodeOdom::TfCamCb(const geometry_msgs::msg::Transform& tf_cam_msg) {
